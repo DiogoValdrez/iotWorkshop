@@ -1,0 +1,140 @@
+function getModuleData(module){
+var data = {
+    icon: "",
+    status: "",
+    timestamp: "",
+    rawvalue: "",
+    unit: "",
+    rawvalue1: "",
+    rawvalue2: "",
+    rawvalue3: ""
+};
+data.icon = "user/" + Eiot.Data.ProfileId + "/images/leak_1.png";
+var ic = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Settings.Icon1");
+if (ic != null && ic != "" && ic != "undefined")
+  	data.icon = "user/" + Eiot.Data.ProfileId + "/images/" + ic.Value;
+var level = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter1");
+if (level != null) {
+   data.unit = level.Unit;
+	data.timestamp = level.Timestamp;
+   data.rawvalue = level.Value;
+   var value = Math.round(level.Value.replace(",", ".") * 100) / 100;
+}
+var level1 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter2");
+if (level1 != null) {
+	data.rawvalue1 = level1.Value;
+	if (data.timestamp < level1.Timestamp)
+		data.timestamp = level1.Timestamp;
+}
+
+var level2 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter3");
+if (level2 != null) {
+	data.rawvalue2 = level2.Value;
+	if (data.timestamp < level2.Timestamp)
+		data.timestamp = level2.Timestamp;
+
+	if (level2.Value == "1") 
+		data.status = "Pump On";
+        else
+                data.status = "Pump Off";
+}
+
+
+
+var level3 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter4");
+if (level3 != null) {
+	data.rawvalue3 = level3.Value;
+	if (data.timestamp < level3.Timestamp)
+		data.timestamp = level3.Timestamp;
+
+        data.status =  ((level3.Description == "") ? "" :  level3.Description +":") + level3.Value +  ((level3.Unit == "") ? "" : "&nbsp;" + level3.Unit)   + ", " + data.status;
+}
+
+
+return data;
+}
+function initControl(control)
+{
+	var sliderVal;
+	var o4 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter1");
+	if (o4 != null) {
+		sliderVal = Math.round(o4.Value.replace(",", ".") * 100) / 100;
+		if (isNaN(sliderVal)) sliderVal = o4.Value;
+	}
+			var sliderMinValue =  0;
+			var sliderMaxValue =  100;
+			var sliderValueStep =  1;
+			var o1 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Settings.SliderMinValue");
+			if (o1 != null) {
+				sliderMinValue = Math.round(o1.Value.replace(",", ".") * 100) / 100;
+				if (isNaN(sliderMinValue)) sliderMinValue = o1.Value;
+			}
+			var o2 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Settings.SliderMaxValue");
+			if (o2 != null) {
+				sliderMaxValue = Math.round(o2.Value.replace(",", ".") * 100) / 100;
+				if (isNaN(sliderMaxValue)) sliderMaxValue = o2.Value;
+			}
+			var o3 = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Settings.SliderStep");
+			if (o3 != null) {
+				sliderValueStep = Math.round(o3.Value.replace(",", ".") * 100) / 100;
+				if (isNaN(sliderValueStep)) sliderValueStep = o3.Value;
+			}
+			control.find("[data-ui-field=control_slider]").prop("min", sliderMinValue);
+			control.find("[data-ui-field=control_slider]").prop("max", sliderMaxValue);
+			control.find("[data-ui-field=control_slider]").prop("step", sliderValueStep);
+			control.find("[data-ui-field=control_slider]").slider();
+			control.find("[data-ui-field=control_slider]").val(sliderVal).slider("refresh");
+                        control.find("[data-ui-field=control_slider]").on("slidestop", function(event, ui) {	
+
+                        for (var j = 0; j < Eiot.Data.Modules.length; j++) {
+		           if ( Eiot.Data.Modules[j].Id == event.target.id  )
+		           {
+			      var param = Eiot.WebApp.Utility.GetModulePropertyByName(Eiot.Data.Modules[j], "Sensor.Parameter1");
+			      if (param != null){
+			        Eiot.Data.ServiceCall("Control/Parameter/SetValue/"+param.Id+"/"+control.find("[data-ui-field=control_slider]").val(), null, "POST", null);
+			   }
+	 	         }
+	               } 
+                   });
+
+var state = "0";
+var level = Eiot.WebApp.Utility.GetModulePropertyByName(module, "Sensor.Parameter2");
+if (level != null && level.Value == "1") 
+	state = "1";
+
+control.find("[data-ui-field=flipsw]").val(state).slider("refresh");
+control.find("[data-ui-field=flipsw]").on("change", function(event, ui) {	for (var j = 0; j < Eiot.Data.Modules.length; j++) {
+		if ((Eiot.Data.Modules[j].Id + "_mode") == event.target.id)
+		{
+			var param = Eiot.WebApp.Utility.GetModulePropertyByName(Eiot.Data.Modules[j], "Sensor.Parameter2");
+			if (param != null){
+				Eiot.Data.ServiceCall("Control/Parameter/SetValue/"+param.Id+"/"+control.find("[data-ui-field=flipsw]").val(), null, "POST", null);
+			}
+		}
+	}
+});
+
+control.find("[data-ui-field=flipsw1]").val(state).slider("refresh");
+control.find("[data-ui-field=flipsw1]").on("change", function(event, ui) {	for (var j = 0; j < Eiot.Data.Modules.length; j++) {
+		if ((Eiot.Data.Modules[j].Id + "_pump") == event.target.id)
+		{
+			var param = Eiot.WebApp.Utility.GetModulePropertyByName(Eiot.Data.Modules[j], "Sensor.Parameter3");
+			if (param != null){
+				Eiot.Data.ServiceCall("Control/Parameter/SetValue/"+param.Id+"/"+control.find("[data-ui-field=flipsw1]").val(), null, "POST", null);
+			}
+		}
+	}
+});
+
+
+}
+
+function updateControl(control, data)
+{
+	control.find("[data-ui-field=control_slider]").val(data.rawvalue);
+	control.find("[data-ui-field=control_slider]").slider("refresh");
+	control.find("[data-ui-field=flipsw]").val(data.rawvalue1);
+	control.find("[data-ui-field=flipsw]").slider("refresh");
+	control.find("[data-ui-field=flipsw1]").val(data.rawvalue2);
+	control.find("[data-ui-field=flipsw1]").slider("refresh");
+}

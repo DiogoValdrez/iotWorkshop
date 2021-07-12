@@ -1,0 +1,35 @@
+<a data-ui-field="widget">
+<img data-ui-field="icon" style="margin-left: 10px; margin-top: 10px" width="42" src="" />
+<div style="margin-left: -40px;"><span data-ui-field="name">' + module.Name + '</span>
+<span data-ui-field="id" style="color: gray; font-size: 8pt; position: absolute; right: 20px;text-align: right">#' + module.Id + '</span><br />
+<div data-ui-field="status" style="font-family: Monospace; font-size: 12pt; color: black">status</div>
+<div data-ui-field="sensorstatus" style="font-family: Monospace; font-size: 10pt;color: green; text-wrapping: wrap; margin-top: 5px; padding-bottom: 5px;">sensorstatus</div>
+<div data-ui-field="updatetime" style="position: absolute; right: 20px;top: 25px;color: gray; font-size: 8pt; font-weight: normal; text-align: right">time</div>
+<div data-ui-field="control" style="margin-top:10px; width=100%; ">
+<input  id=' + module.Id + ' data-ui-field="control_slider" type="range" name="slider-fill"  data-highlight="true" />
+</div>
+
+<!-- mode auto/manual -->
+<div data-ui-field="control" style="margin-top:10px; width=100%; height: 60px ">
+<label data-ui-field="label_r" >Mode</label>
+<div data-ui-field="control" style="position:absolute;margin-top:-10px;right:10px">
+<select id="' + module.Id + '_mode" data-role="slider" data-ui-field="flipsw" >
+<option data-ui-field="flipsw_st_off" value="0">Manual</option>
+<option data-ui-field="flipsw_st_off" value="1">Auto</option>
+</select>
+</div>
+</div>
+
+<!-- motor pump -->
+<div data-ui-field="control" style="margin-top:10px; width=100%;  height: 60px ">
+<label data-ui-field="label_r" >Pump</label>
+<div data-ui-field="control" style="position:absolute;margin-top:-10px;right:10px">
+<select id="' + module.Id + '_pump" data-role="slider" data-ui-field="flipsw1" >
+<option data-ui-field="flipsw1_st_off" value="0">Off</option>
+<option data-ui-field="flipsw1_st_off" value="1">On</option>
+</select>
+</div>
+</div>
+
+</div>
+</a>
